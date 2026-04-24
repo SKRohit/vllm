@@ -1144,11 +1144,6 @@ class Gemma4Model(nn.Module, EagleModelMixin):
                     dtype=dtype,
                     device=device,
                 ),
-                "residual": torch.zeros(
-                    (batch_size, hidden_size),
-                    dtype=dtype,
-                    device=device,
-                ),
             }
             if ple_dim and ple_dim > 0:
                 tensors["per_layer_inputs"] = torch.zeros(
@@ -1312,14 +1307,12 @@ class Gemma4Model(nn.Module, EagleModelMixin):
                 per_layer_inputs = self.project_per_layer_inputs(
                     hidden_states, per_layer_embeds
                 )
-            residual = None
         else:
             assert intermediate_tensors is not None
             hidden_states = intermediate_tensors["hidden_states"]
-            residual = intermediate_tensors["residual"]
             if per_layer_inputs is not None:
                 per_layer_inputs = intermediate_tensors["per_layer_inputs"]
-
+        residual = None
         aux_hidden_states = self._maybe_add_hidden_state([], 0, hidden_states, residual)
         for layer_idx, layer in enumerate(
             islice(self.layers, self.start_layer, self.end_layer)
